@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Калькулятор нафтопродуктів 3.0</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Unbounded:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: #30363d;
+    --accent: #1f6feb;
+    --accent2: #388bfd;
+    --fg: #e6edf3;
+    --fg2: #8b949e;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #da3633;
+    --orange: #f0883e;
+    --radius: 12px;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Unbounded', sans-serif;
+  }
+
+  .light {
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --surface2: #f6f8fa;
+    --border: #d0d7de;
+    --accent: #0969da;
+    --accent2: #1a7f37;
+    --fg: #24292f;
+    --fg2: #57606a;
+    --green: #1a7f37;
+    --yellow: #9a6700;
+    --red: #cf222e;
+    --orange: #bc4c00;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+
+  .header-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .header-title span {
+    display: block;
+    font-size: 9px;
+    color: var(--fg2);
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+  }
+
+  .header-btns {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .icon-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    color: var(--fg);
+  }
+
+  .icon-btn:hover { background: var(--border); }
+  .icon-btn:active { transform: scale(0.94); }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex: 1;
+    padding: 11px 6px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 10px;
+    color: var(--fg2);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    min-width: 56px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab:hover:not(.active) { color: var(--fg); background: var(--surface2); }
+
+  /* ── CONTENT ── */
+  .content { padding: 16px; max-width: 600px; margin: 0 auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--fg2);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  /* ── FORM ELEMENTS ── */
+  label {
+    display: block;
+    font-size: 11px;
+    color: var(--fg2);
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  select, input[type="number"], input[type="text"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+    margin-bottom: 12px;
+  }
+
+  select:focus, input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.15);
+  }
+
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b949e' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; cursor: pointer; }
+
+  /* ── TOGGLE ROW ── */
+  .toggle-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .toggle-btn {
+    padding: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--fg2);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .toggle-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .toggle-btn:hover:not(.active) { border-color: var(--accent); color: var(--fg); }
+
+  /* ── DIRECTION BTN ── */
+  .dir-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--fg);
+    font-size: 14px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    text-align: center;
+    margin-bottom: 12px;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .dir-btn:hover { border-color: var(--accent); background: var(--surface); }
+  .dir-btn:active { transform: scale(0.99); }
+
+  /* ── CALCULATE BUTTON ── */
+  .calc-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .calc-btn:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(31,111,235,0.4); }
+  .calc-btn:active { transform: translateY(0); box-shadow: none; }
+
+  /* ── RESULT ── */
+  .result-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 12px;
+    min-height: 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--green);
+    letter-spacing: -1px;
+    transition: all 0.3s;
+  }
+
+  .result-label {
+    font-size: 11px;
+    color: var(--fg2);
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  .result-placeholder {
+    color: var(--fg2);
+    font-size: 12px;
+  }
+
+  .result-flash {
+    animation: flash 0.4s ease;
+  }
+
+  @keyframes flash {
+    0% { opacity: 0; transform: scale(0.95); }
+    50% { opacity: 1; transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── DENSITY BADGE ── */
+  .density-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 11px;
+    color: var(--fg2);
+    margin-bottom: 12px;
+  }
+
+  .density-badge .val { color: var(--accent); font-weight: 700; }
+
+  /* ── HISTORY ── */
+  .history-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: start;
+    animation: slideIn 0.25s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .history-fuel { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .history-detail { font-size: 11px; color: var(--fg2); }
+  .history-result { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--green); text-align: right; }
+  .history-time { font-size: 10px; color: var(--fg2); text-align: right; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--fg2);
+    font-size: 13px;
+  }
+
+  .empty-state .emoji { font-size: 40px; display: block; margin-bottom: 12px; }
+
+  /* ── ADD LIQUID ── */
+  .add-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    color: var(--green);
+    font-size: 14px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .add-btn:hover { background: rgba(63,185,80,0.1); }
+  .add-btn:active { transform: scale(0.98); }
+
+  /* ── INFO ── */
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-key { color: var(--fg2); }
+  .info-val { font-weight: 600; }
+
+  /* ── LANG GRID ── */
+  .lang-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .lang-btn {
+    padding: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--fg);
+    font-size: 13px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .lang-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(31,111,235,0.1); }
+  .lang-btn:hover:not(.active) { border-color: var(--fg2); }
+
+  /* ── MARTA ── */
+  .marta-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .marta-btn:hover { transform: scale(1.1) rotate(-5deg); }
+  .marta-btn:active { transform: scale(0.95); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 13px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 8px 16px;
+    font-size: 11px;
+    color: var(--fg2);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 40;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── ROUNDING SELECTOR ── */
+  .round-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .round-btn {
+    padding: 8px 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--fg2);
+    font-size: 10px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .round-btn.active { background: var(--yellow); border-color: var(--yellow); color: #000; font-weight: 700; }
+
+  /* ── ICON PICKER ── */
+  .icon-picker {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .icon-opt {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .icon-opt.active { border-color: var(--accent); background: rgba(31,111,235,0.15); }
+  .icon-opt:hover { border-color: var(--fg2); }
+
+  .pb { padding-bottom: 120px; }
+
+  /* ── MANUAL DENSITY ── */
+  .manual-section { display: none; }
+  .manual-section.show { display: block; }
+
+  /* ── CLEAR BTN ── */
+  .clear-btn {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    color: var(--red);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .clear-btn:hover { background: rgba(218,54,51,0.1); }
+
+  @media (max-width: 400px) {
+    .header-title { font-size: 11px; }
+    .result-value { font-size: 24px; }
+    .lang-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">
+    ⛽ НАФТОПРОДУКТИ
+    <span id="headerSub">v3.0 — КАЛЬКУЛЯТОР</span>
+  </div>
+  <div class="header-btns">
+    <button class="icon-btn" id="themeBtn" title="Тема" onclick="toggleTheme()">🌙</button>
+  </div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="content pb" id="mainContent">
+
+  <!-- CALCULATOR TAB -->
+  <div class="panel active" id="panel-calc">
+    <div class="card">
+      <div class="card-title" id="lbl-mode">Режим</div>
+      <div class="toggle-row">
+        <div class="toggle-btn active" id="modePresetBtn" onclick="setMode('preset')" id="lbl-mode-preset">Зі списку</div>
+        <div class="toggle-btn" id="modeManualBtn" onclick="setMode('manual')" id="lbl-mode-manual">Вручну</div>
+      </div>
+
+      <div id="presetSection">
+        <label id="lbl-fuel">Пальне:</label>
+        <select id="fuelSelect" onchange="onFuelChange()"></select>
+        <div class="density-badge" id="densityBadge">
+          Щільність: <span class="val" id="densityVal">—</span> г/см³
+        </div>
+      </div>
+
+      <div class="manual-section" id="manualSection">
+        <label id="lbl-density">Щільність (г/см³):</label>
+        <input type="number" id="manualDensity" placeholder="напр. 0.845" step="0.001" min="0.1" max="2.0">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="lbl-direction-title">Напрям розрахунку</div>
+      <div class="toggle-row">
+        <div class="toggle-btn active" id="dirLtoK" onclick="setDir('l_to_kg')">Літри → Кг</div>
+        <div class="toggle-btn" id="dirKtoL" onclick="setDir('kg_to_l')">Кг → Літри</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="lbl-rounding">Округлення</div>
+      <div class="round-row">
+        <div class="round-btn active" onclick="setRounding('exact')" id="roundExact">🎯 Точний</div>
+        <div class="round-btn" onclick="setRounding('tenth')" id="roundTenth">🔟 Десяті</div>
+        <div class="round-btn" onclick="setRounding('hundredth')" id="roundHundredth">💯 Соті</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="lbl-value">Введіть значення</div>
+      <input type="number" id="valueInput" placeholder="0.000" step="0.001" min="0" style="font-size:18px;font-weight:700;margin-bottom:0">
+      <div class="result-box" id="resultBox">
+        <div class="result-placeholder" id="resultPlaceholder">Введіть значення та натисніть «Розрахувати»</div>
+        <div id="resultContent" style="display:none;text-align:center">
+          <div class="result-value" id="resultValue">—</div>
+          <div class="result-label" id="resultLabel"></div>
+        </div>
+      </div>
+      <br>
+      <button class="calc-btn" id="calcBtn" onclick="calculate()">Розрахувати</button>
+    </div>
+  </div>
+
+  <!-- ADD LIQUID TAB -->
+  <div class="panel" id="panel-add">
+    <div class="card">
+      <div class="card-title" id="lbl-add-title">Нова рідина</div>
+
+      <label id="lbl-new-name">Назва рідини:</label>
+      <input type="text" id="newName" placeholder="напр. МТ-16п">
+
+      <label id="lbl-new-density">Щільність (г/см³):</label>
+      <input type="number" id="newDensity" placeholder="напр. 0.890" step="0.001" min="0.1" max="2.5">
+
+      <label>Іконка:</label>
+      <div class="icon-picker" id="iconPicker">
+        <div class="icon-opt active" data-icon="⛽" onclick="selectIcon(this)">⛽</div>
+        <div class="icon-opt" data-icon="🛢️" onclick="selectIcon(this)">🛢️</div>
+        <div class="icon-opt" data-icon="🔧" onclick="selectIcon(this)">🔧</div>
+        <div class="icon-opt" data-icon="❄️" onclick="selectIcon(this)">❄️</div>
+        <div class="icon-opt" data-icon="⚙️" onclick="selectIcon(this)">⚙️</div>
+        <div class="icon-opt" data-icon="💧" onclick="selectIcon(this)">💧</div>
+        <div class="icon-opt" data-icon="🔫" onclick="selectIcon(this)">🔫</div>
+        <div class="icon-opt" data-icon="🟠" onclick="selectIcon(this)">🟠</div>
+      </div>
+
+      <button class="add-btn" onclick="addLiquid()" id="addLiqBtn">➕ Додати до списку</button>
+      <p style="font-size:11px;color:var(--fg2);margin-top:8px;text-align:center" id="lbl-add-hint">З'явиться у списку калькулятора</p>
+    </div>
+
+    <div class="card" id="customListCard">
+      <div class="card-title">Власні рідини</div>
+      <div id="customList"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div class="panel" id="panel-history">
+    <div class="card" style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="card-title" style="margin:0" id="lbl-history">Останні 20 розрахунків</div>
+        <button class="clear-btn" style="width:auto;padding:6px 12px;margin:0" onclick="clearHistory()">🗑 Очистити</button>
+      </div>
+    </div>
+    <div id="historyList"></div>
+  </div>
+
+  <!-- INFO TAB -->
+  <div class="panel" id="panel-info">
+    <div class="card">
+      <div class="card-title" id="lbl-info-title">Про програму</div>
+      <div class="info-row">
+        <span class="info-key" id="lbl-version-k">Версія</span>
+        <span class="info-val">3.0</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key" id="lbl-date-k">Дата збірки</span>
+        <span class="info-val">16.04.2026</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key" id="lbl-license-k">Ліцензія</span>
+        <span class="info-val" id="lbl-license-v">Внутрішнє використання</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Platform</span>
+        <span class="info-val">Web / PWA</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" id="lbl-desc-title">Опис</div>
+      <p style="font-size:12px;line-height:1.7;color:var(--fg2)" id="infoDesc">
+        Програма призначена для швидкого перерахунку об'єму нафтопродуктів у масу та навпаки. Підтримує стандартні марки пального та оливи, а також дозволяє додавати власні рідини з довільною щільністю.
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">Стандартні щільності</div>
+      <div id="densityTable"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div class="panel" id="panel-settings">
+    <div class="card">
+      <div class="card-title" id="lbl-lang-title">🌐 Вибір мови</div>
+      <div class="lang-grid" id="langGrid"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Тема оформлення</div>
+      <div class="toggle-row">
+        <div class="toggle-btn" id="themeLight" onclick="setTheme('light')">☀️ Світла</div>
+        <div class="toggle-btn active" id="themeDark" onclick="setTheme('dark')">🌙 Темна</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="status-bar">
+  <div><span class="status-dot"></span><span id="statusText">Готово</span></div>
+  <div style="color:var(--fg2);font-size:10px">v3.0</div>
+</div>
+
+<button class="marta-btn" onclick="showMarta()" title="Порада від кота">🐾</button>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  ДАНІ
+// ═══════════════════════════════════════════
+const DEFAULT_DENSITIES = {
+  "A80":0.735,"A92":0.745,"A95":0.755,"DP_summer":0.835,
+  "DP_winter":0.825,"Mazut":0.920,"Oil_5W30":0.900,"Oil_5W40":0.900,
+  "Oil_10W40":0.900,"Oil_15W40":0.900,"Oil_XW40":0.900,"Coolant_A40":1.100,
+  "TAP17":1.000,"Litol":1.000,"Gun_oil":0.900,"Hydraulic":0.900,
+};
+
+const DEFAULT_ICONS = {
+  "A80":"⛽","A92":"⛽","A95":"⛽","DP_summer":"🛢️","DP_winter":"🛢️",
+  "Mazut":"🛢️","Oil_5W30":"🔧","Oil_5W40":"🔧","Oil_10W40":"🔧",
+  "Oil_15W40":"🔧","Oil_XW40":"🔧","Coolant_A40":"❄️","TAP17":"⚙️",
+  "Litol":"🟠","Gun_oil":"🔫","Hydraulic":"💧"
+};
+
+const FUEL_NAMES = {
+  "uk":{"A80":"А-80","A92":"А-92","A95":"А-95","DP_summer":"ДП літній","DP_winter":"ДП зимовий","Mazut":"Мазут","Oil_5W30":"Олива 5W30","Oil_5W40":"Олива 5W40","Oil_10W40":"Олива 10W40","Oil_15W40":"Олива 15W40","Oil_XW40":"Олива XW40","Coolant_A40":"Тосол А-40","TAP17":"ТАП-17","Litol":"Літол","Gun_oil":"Олива для зброї","Hydraulic":"Гідравлічна олива"},
+  "en":{"A80":"Petrol A-80","A92":"Petrol A-92","A95":"Petrol A-95","DP_summer":"Diesel Summer","DP_winter":"Diesel Winter","Mazut":"Mazut","Oil_5W30":"Engine Oil 5W30","Oil_5W40":"Engine Oil 5W40","Oil_10W40":"Engine Oil 10W40","Oil_15W40":"Engine Oil 15W40","Oil_XW40":"Engine Oil XW40","Coolant_A40":"Coolant A-40","TAP17":"Gear Oil TAP-17","Litol":"Litol Grease","Gun_oil":"Gun Oil","Hydraulic":"Hydraulic Oil"},
+  "ru":{"A80":"А-80","A92":"А-92","A95":"А-95","DP_summer":"ДТ летнее","DP_winter":"ДТ зимнее","Mazut":"Мазут","Oil_5W30":"Масло 5W30","Oil_5W40":"Масло 5W40","Oil_10W40":"Масло 10W40","Oil_15W40":"Масло 15W40","Oil_XW40":"Масло XW40","Coolant_A40":"Тосол А-40","TAP17":"ТАП-17","Litol":"Литол","Gun_oil":"Оружейное масло","Hydraulic":"Гидравлическое масло"},
+  "de":{"A80":"Benzin A-80","A92":"Benzin A-92","A95":"Benzin A-95","DP_summer":"Diesel Sommer","DP_winter":"Diesel Winter","Mazut":"Masut","Oil_5W30":"Motoröl 5W30","Oil_5W40":"Motoröl 5W40","Oil_10W40":"Motoröl 10W40","Oil_15W40":"Motoröl 15W40","Oil_XW40":"Motoröl XW40","Coolant_A40":"Kühlmittel A-40","TAP17":"Getriebeöl TAP-17","Litol":"Litol","Gun_oil":"Waffenöl","Hydraulic":"Hydrauliköl"},
+  "it":{"A80":"Benzina A-80","A92":"Benzina A-92","A95":"Benzina A-95","DP_summer":"Diesel estivo","DP_winter":"Diesel invernale","Mazut":"Mazut","Oil_5W30":"Olio motore 5W30","Oil_5W40":"Olio motore 5W40","Oil_10W40":"Olio motore 10W40","Oil_15W40":"Olio motore 15W40","Oil_XW40":"Olio motore XW40","Coolant_A40":"Liquido refrigerante A-40","TAP17":"Olio TAP-17","Litol":"Litol","Gun_oil":"Olio per armi","Hydraulic":"Olio idraulico"},
+  "pt":{"A80":"Gasolina A-80","A92":"Gasolina A-92","A95":"Gasolina A-95","DP_summer":"Diesel verão","DP_winter":"Diesel inverno","Mazut":"Mazute","Oil_5W30":"Óleo 5W30","Oil_5W40":"Óleo 5W40","Oil_10W40":"Óleo 10W40","Oil_15W40":"Óleo 15W40","Oil_XW40":"Óleo XW40","Coolant_A40":"Líquido A-40","TAP17":"Óleo TAP-17","Litol":"Litol","Gun_oil":"Óleo armas","Hydraulic":"Óleo hidráulico"},
+  "tr":{"A80":"Benzin A-80","A92":"Benzin A-92","A95":"Benzin A-95","DP_summer":"Yazlık Dizel","DP_winter":"Kışlık Dizel","Mazut":"Mazot","Oil_5W30":"Yağ 5W30","Oil_5W40":"Yağ 5W40","Oil_10W40":"Yağ 10W40","Oil_15W40":"Yağ 15W40","Oil_XW40":"Yağ XW40","Coolant_A40":"Antifriz A-40","TAP17":"TAP-17","Litol":"Litol","Gun_oil":"Silah Yağı","Hydraulic":"Hidrolik Yağ"},
+  "ro":{"A80":"Benzină A-80","A92":"Benzină A-92","A95":"Benzină A-95","DP_summer":"Motorină vară","DP_winter":"Motorină iarnă","Mazut":"Păcură","Oil_5W30":"Ulei 5W30","Oil_5W40":"Ulei 5W40","Oil_10W40":"Ulei 10W40","Oil_15W40":"Ulei 15W40","Oil_XW40":"Ulei XW40","Coolant_A40":"Lichid A-40","TAP17":"Ulei TAP-17","Litol":"Litol","Gun_oil":"Ulei arme","Hydraulic":"Ulei hidraulic"},
+};
+
+const TRANSLATIONS = {
+  "uk":{"flag":"🇺🇦","name":"Українська","tab_calc":"⚙️ Калькулятор","tab_add":"➕ Рідина","tab_history":"📋 Історія","tab_info":"ℹ️ Інфо","tab_settings":"🌐 Налаш.","status_ready":"Готово","status_done":"Готово ✔","status_err":"Помилка","err_density":"❗ Вкажіть щільність","err_value":"❗ Введіть значення","result_kg":"кг","result_t":"т","result_l":"л","marta":["🐾 Кіт: Перевір щільність двічі!","🐾 Кіт: АКТИ СПИСАННЯ ТОСОЛУ Є?","🐾 Кіт: Будь спокійним, як кіт після паштету.","🐾 Кіт: Чиста зброя — влучний постріл.","🐾 Кіт: Пий більше води!","🐾 Кіт: Найкращий калькулятор — той, що без помилок."]},
+  "en":{"flag":"🇬🇧","name":"English","tab_calc":"⚙️ Calc","tab_add":"➕ Add","tab_history":"📋 History","tab_info":"ℹ️ Info","tab_settings":"🌐 Settings","status_ready":"Ready","status_done":"Done ✔","status_err":"Error","err_density":"❗ Enter density","err_value":"❗ Enter value","result_kg":"kg","result_t":"t","result_l":"l","marta":["🐾 Cat says: Check density twice!","🐾 Cat says: Stay calm, like a well-fed cat.","🐾 Cat says: A clean weapon fires true.","🐾 Cat says: Drink more water!","🐾 Cat says: The best calculator makes no mistakes."]},
+  "ru":{"flag":"🇷🇺","name":"Русский","tab_calc":"⚙️ Счёт","tab_add":"➕ Добавить","tab_history":"📋 История","tab_info":"ℹ️ Инфо","tab_settings":"🌐 Настройки","status_ready":"Готово","status_done":"Готово ✔","status_err":"Ошибка","err_density":"❗ Укажите плотность","err_value":"❗ Введите значение","result_kg":"кг","result_t":"т","result_l":"л","marta":["🐾 Кот: Проверь плотность дважды!","🐾 Кот: Будь спокоен, как сытый кот.","🐾 Кот: Пей больше воды!"]},
+  "de":{"flag":"🇩🇪","name":"Deutsch","tab_calc":"⚙️ Rechner","tab_add":"➕ Hinzuf.","tab_history":"📋 Verlauf","tab_info":"ℹ️ Info","tab_settings":"🌐 Einst.","status_ready":"Bereit","status_done":"Fertig ✔","status_err":"Fehler","err_density":"❗ Dichte eingeben","err_value":"❗ Wert eingeben","result_kg":"kg","result_t":"t","result_l":"l","marta":["🐾 Katze: Dichte zweimal prüfen!","🐾 Katze: Mehr Wasser trinken!"]},
+  "it":{"flag":"🇮🇹","name":"Italiano","tab_calc":"⚙️ Calcolo","tab_add":"➕ Aggiungi","tab_history":"📋 Storico","tab_info":"ℹ️ Info","tab_settings":"🌐 Impost.","status_ready":"Pronto","status_done":"Fatto ✔","status_err":"Errore","err_density":"❗ Inserisci densità","err_value":"❗ Inserisci valore","result_kg":"kg","result_t":"t","result_l":"l","marta":["🐾 Gatto: Controlla la densità!","🐾 Gatto: Bevi più acqua!"]},
+  "pt":{"flag":"🇵🇹","name":"Português","tab_calc":"⚙️ Calcul.","tab_add":"➕ Adicionar","tab_history":"📋 Histórico","tab_info":"ℹ️ Info","tab_settings":"🌐 Config.","status_ready":"Pronto","status_done":"Concluído ✔","status_err":"Erro","err_density":"❗ Insira densidade","err_value":"❗ Insira valor","result_kg":"kg","result_t":"t","result_l":"l","marta":["🐾 Gato: Verifique a densidade!","🐾 Gato: Beba mais água!"]},
+  "tr":{"flag":"🇹🇷","name":"Türkçe","tab_calc":"⚙️ Hesap","tab_add":"➕ Ekle","tab_history":"📋 Geçmiş","tab_info":"ℹ️ Bilgi","tab_settings":"🌐 Ayarlar","status_ready":"Hazır","status_done":"Tamam ✔","status_err":"Hata","err_density":"❗ Yoğunluk girin","err_value":"❗ Değer girin","result_kg":"kg","result_t":"t","result_l":"l","marta":["🐾 Kedi: Yoğunluğu iki kez kontrol et!","🐾 Kedi: Daha fazla su iç!"]},
+  "ro":{"flag":"🇷🇴","name":"Română","tab_calc":"⚙️ Calcul","tab_add":"➕ Adaugă","tab_history":"📋 Istoric","tab_info":"ℹ️ Info","tab_settings":"🌐 Setări","status_ready":"Gata","status_done":"Gata ✔","status_err":"Eroare","err_density":"❗ Introduceți densitatea","err_value":"❗ Introduceți valoarea","result_kg":"kg","result_t":"t","result_l":"l","marta":["🐾 Pisică: Verifică densitatea!","🐾 Pisică: Bea mai multă apă!"]},
+};
+
+const LANG_ORDER = ["uk","en","ru","de","it","pt","tr","ro"];
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state = {
+  lang: "uk",
+  theme: "dark",
+  mode: "preset",
+  direction: "l_to_kg",
+  rounding: "exact",
+  currentTab: "calc",
+  selectedIcon: "⛽",
+  densities: {...DEFAULT_DENSITIES},
+  icons: {...DEFAULT_ICONS},
+  customFuels: {},
+  history: [],
+};
+
+// Load from localStorage
+try {
+  const saved = localStorage.getItem("fuelCalcState");
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    Object.assign(state, parsed);
+    // Always merge defaults
+    state.densities = {...DEFAULT_DENSITIES, ...state.densities};
+    state.icons = {...DEFAULT_ICONS, ...state.icons};
+  }
+} catch(e) {}
+
+function saveState() {
+  try { localStorage.setItem("fuelCalcState", JSON.stringify(state)); } catch(e) {}
+}
+
+function T(key) {
+  return (TRANSLATIONS[state.lang] || TRANSLATIONS["uk"])[key] || key;
+}
+
+function getFuelName(id) {
+  const names = FUEL_NAMES[state.lang] || FUEL_NAMES["uk"];
+  return names[id] || state.customFuels[id]?.name || id;
+}
+
+function applyRounding(v) {
+  if (state.rounding === "tenth") return Math.round(v * 10) / 10;
+  if (state.rounding === "hundredth") return Math.round(v * 100) / 100;
+  return v;
+}
+
+// ═══════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════
+const TAB_KEYS = ["calc","add","history","info","settings"];
+
+function buildTabs() {
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
+  TAB_KEYS.forEach(key => {
+    const d = document.createElement("div");
+    d.className = "tab" + (state.currentTab === key ? " active" : "");
+    d.textContent = T("tab_" + key);
+    d.onclick = () => switchTab(key);
+    tabs.appendChild(d);
+  });
+}
+
+function switchTab(key) {
+  state.currentTab = key;
+  saveState();
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("panel-" + key).classList.add("active");
+  buildTabs();
+  if (key === "history") renderHistory();
+  if (key === "add") renderCustomList();
+  if (key === "info") renderDensityTable();
+}
+
+// ═══════════════════════════════════════════
+//  THEME
+// ═══════════════════════════════════════════
+function applyTheme() {
+  document.body.className = state.theme === "light" ? "light" : "";
+  document.getElementById("themeBtn").textContent = state.theme === "light" ? "🌙" : "☀️";
+  document.getElementById("themeLight").classList.toggle("active", state.theme === "light");
+  document.getElementById("themeDark").classList.toggle("active", state.theme === "dark");
+}
+
+function toggleTheme() { setTheme(state.theme === "dark" ? "light" : "dark"); }
+
+function setTheme(t) {
+  state.theme = t;
+  saveState();
+  applyTheme();
+}
+
+// ═══════════════════════════════════════════
+//  FUEL SELECT
+// ═══════════════════════════════════════════
+function buildFuelSelect() {
+  const sel = document.getElementById("fuelSelect");
+  const current = sel.value || Object.keys(DEFAULT_DENSITIES)[0];
+  sel.innerHTML = "";
+  // Default fuels
+  Object.keys(DEFAULT_DENSITIES).forEach(id => {
+    const opt = document.createElement("option");
+    opt.value = id;
+    opt.textContent = (DEFAULT_ICONS[id] || "⛽") + " " + getFuelName(id);
+    sel.appendChild(opt);
+  });
+  // Custom fuels
+  Object.keys(state.customFuels).forEach(id => {
+    const opt = document.createElement("option");
+    opt.value = id;
+    opt.textContent = (state.customFuels[id].icon || "💧") + " " + state.customFuels[id].name;
+    sel.appendChild(opt);
+  });
+  sel.value = current || sel.options[0]?.value;
+  onFuelChange();
+}
+
+function onFuelChange() {
+  const id = document.getElementById("fuelSelect").value;
+  let dens = state.densities[id] || state.customFuels[id]?.density || 1;
+  document.getElementById("densityVal").textContent = dens.toFixed(3);
+}
+
+// ═══════════════════════════════════════════
+//  MODE / DIR / ROUNDING
+// ═══════════════════════════════════════════
+function setMode(m) {
+  state.mode = m;
+  saveState();
+  document.getElementById("modePresetBtn").classList.toggle("active", m === "preset");
+  document.getElementById("modeManualBtn").classList.toggle("active", m === "manual");
+  document.getElementById("presetSection").style.display = m === "preset" ? "block" : "none";
+  document.getElementById("manualSection").classList.toggle("show", m === "manual");
+}
+
+function setDir(d) {
+  state.direction = d;
+  saveState();
+  document.getElementById("dirLtoK").classList.toggle("active", d === "l_to_kg");
+  document.getElementById("dirKtoL").classList.toggle("active", d === "kg_to_l");
+}
+
+function setRounding(r) {
+  state.rounding = r;
+  saveState();
+  document.getElementById("roundExact").classList.toggle("active", r === "exact");
+  document.getElementById("roundTenth").classList.toggle("active", r === "tenth");
+  document.getElementById("roundHundredth").classList.toggle("active", r === "hundredth");
+}
+
+// ═══════════════════════════════════════════
+//  CALCULATE
+// ═══════════════════════════════════════════
+function calculate() {
+  setStatus(T("status_calc") || "Розрахунок...", "yellow");
+
+  let density;
+  if (state.mode === "preset") {
+    const id = document.getElementById("fuelSelect").value;
+    density = state.densities[id] || state.customFuels[id]?.density;
+  } else {
+    density = parseFloat(document.getElementById("manualDensity").value);
+  }
+
+  const rawValue = parseFloat(document.getElementById("valueInput").value);
+
+  if (!density || isNaN(density) || density <= 0) {
+    showToast(T("err_density"));
+    setStatus(T("status_err"), "red");
+    return;
+  }
+  if (isNaN(rawValue) || rawValue <= 0) {
+    showToast(T("err_value"));
+    setStatus(T("status_err"), "red");
+    return;
+  }
+
+  let result, label;
+  if (state.direction === "l_to_kg") {
+    const kg = applyRounding(rawValue * density);
+    const t = applyRounding(kg / 1000);
+    result = `${kg.toLocaleString()} ${T("result_kg")}`;
+    label = `(${t.toLocaleString()} ${T("result_t")})  ·  ${rawValue}л × ${density} г/см³`;
+  } else {
+    const l = applyRounding(rawValue / density);
+    result = `${l.toLocaleString()} ${T("result_l")}`;
+    label = `${rawValue}${T("result_kg")} ÷ ${density} г/см³`;
+  }
+
+  // Render result
+  document.getElementById("resultPlaceholder").style.display = "none";
+  const rc = document.getElementById("resultContent");
+  rc.style.display = "block";
+  document.getElementById("resultValue").textContent = result;
+  document.getElementById("resultLabel").textContent = label;
+  rc.classList.remove("result-flash");
+  void rc.offsetWidth;
+  rc.classList.add("result-flash");
+
+  // Save to history
+  const fuelName = state.mode === "preset"
+    ? getFuelName(document.getElementById("fuelSelect").value)
+    : (T("mode_manual") || "Вручну");
+
+  state.history.unshift({
+    datetime: new Date().toLocaleString("uk-UA"),
+    fuel: fuelName,
+    density: density,
+    value: rawValue,
+    direction: state.direction === "l_to_kg" ? "л → кг" : "кг → л",
+    result: result,
+  });
+  state.history = state.history.slice(0, 20);
+  saveState();
+
+  setStatus(T("status_done"), "green");
+}
+
+// ═══════════════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════════════
+function renderHistory() {
+  const el = document.getElementById("historyList");
+  if (!state.history.length) {
+    el.innerHTML = `<div class="empty-state"><span class="emoji">📋</span>Історія розрахунків порожня</div>`;
+    return;
+  }
+  el.innerHTML = state.history.map(h => `
+    <div class="history-item">
+      <div>
+        <div class="history-fuel">${h.fuel}</div>
+        <div class="history-detail">${h.value} · ρ=${h.density} · ${h.direction}</div>
+        <div class="history-detail" style="margin-top:2px;font-size:10px;opacity:0.6">${h.datetime}</div>
+      </div>
+      <div>
+        <div class="history-result">${h.result}</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function clearHistory() {
+  state.history = [];
+  saveState();
+  renderHistory();
+  showToast("🗑 Очищено");
+}
+
+// ═══════════════════════════════════════════
+//  ADD LIQUID
+// ═══════════════════════════════════════════
+function selectIcon(el) {
+  document.querySelectorAll(".icon-opt").forEach(e => e.classList.remove("active"));
+  el.classList.add("active");
+  state.selectedIcon = el.dataset.icon;
+}
+
+function addLiquid() {
+  const name = document.getElementById("newName").value.trim();
+  const density = parseFloat(document.getElementById("newDensity").value);
+  if (!name) { showToast("❗ Введіть назву"); return; }
+  if (isNaN(density) || density <= 0) { showToast("❗ Невірна щільність"); return; }
+
+  const id = "custom_" + name.replace(/\s+/g,"_") + "_" + Date.now();
+  state.customFuels[id] = { name, density, icon: state.selectedIcon };
+  state.densities[id] = density;
+  state.icons[id] = state.selectedIcon;
+  saveState();
+
+  document.getElementById("newName").value = "";
+  document.getElementById("newDensity").value = "";
+  buildFuelSelect();
+  renderCustomList();
+  showToast("✅ " + name + " додано!");
+}
+
+function renderCustomList() {
+  const el = document.getElementById("customList");
+  const keys = Object.keys(state.customFuels);
+  if (!keys.length) {
+    el.innerHTML = `<div style="color:var(--fg2);font-size:12px;text-align:center;padding:16px">Власні рідини відсутні</div>`;
+    return;
+  }
+  el.innerHTML = keys.map(id => {
+    const f = state.customFuels[id];
+    return `<div class="history-item">
+      <div>
+        <div class="history-fuel">${f.icon} ${f.name}</div>
+        <div class="history-detail">ρ = ${f.density.toFixed(3)} г/см³</div>
+      </div>
+      <button onclick="removeLiquid('${id}')" style="background:transparent;border:none;color:var(--red);font-size:18px;cursor:pointer;padding:4px">🗑</button>
+    </div>`;
+  }).join("");
+}
+
+function removeLiquid(id) {
+  delete state.customFuels[id];
+  delete state.densities[id];
+  delete state.icons[id];
+  saveState();
+  buildFuelSelect();
+  renderCustomList();
+  showToast("Видалено");
+}
+
+// ═══════════════════════════════════════════
+//  INFO / DENSITY TABLE
+// ═══════════════════════════════════════════
+function renderDensityTable() {
+  const el = document.getElementById("densityTable");
+  el.innerHTML = Object.entries(DEFAULT_DENSITIES).map(([id, d]) =>
+    `<div class="info-row">
+      <span class="info-key">${DEFAULT_ICONS[id] || "⛽"} ${getFuelName(id)}</span>
+      <span class="info-val" style="color:var(--accent)">${d.toFixed(3)}</span>
+    </div>`
+  ).join("");
+}
+
+// ═══════════════════════════════════════════
+//  LANGUAGE
+// ═══════════════════════════════════════════
+function buildLangGrid() {
+  const el = document.getElementById("langGrid");
+  el.innerHTML = LANG_ORDER.map(code => {
+    const tr = TRANSLATIONS[code];
+    return `<div class="lang-btn${state.lang === code ? " active" : ""}" onclick="setLang('${code}')">
+      ${tr.flag} ${tr.name}
+    </div>`;
+  }).join("");
+}
+
+function setLang(code) {
+  state.lang = code;
+  saveState();
+  buildAll();
+}
+
+// ═══════════════════════════════════════════
+//  MARTA
+// ═══════════════════════════════════════════
+function showMarta() {
+  const advices = T("marta") || ["🐾 Мяу!"];
+  const advice = advices[Math.floor(Math.random() * advices.length)];
+  showToast(advice, 3000);
+}
+
+// ═══════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════
+function setStatus(msg, color) {
+  const el = document.getElementById("statusText");
+  el.textContent = msg;
+  const dot = document.querySelector(".status-dot");
+  dot.style.background = color === "green" ? "var(--green)" : color === "red" ? "var(--red)" : "var(--yellow)";
+}
+
+let toastTimer;
+function showToast(msg, duration=2500) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), duration);
+}
+
+// ═══════════════════════════════════════════
+//  BUILD ALL
+// ═══════════════════════════════════════════
+function buildAll() {
+  applyTheme();
+  buildTabs();
+  buildFuelSelect();
+  buildLangGrid();
+  setMode(state.mode);
+  setDir(state.direction);
+  setRounding(state.rounding);
+  setStatus(T("status_ready"), "green");
+
+  // Tabs labels update
+  const tabEls = document.querySelectorAll(".tab");
+  TAB_KEYS.forEach((key, i) => {
+    if (tabEls[i]) tabEls[i].textContent = T("tab_" + key);
+  });
+
+  if (state.currentTab === "history") renderHistory();
+  if (state.currentTab === "add") renderCustomList();
+  if (state.currentTab === "info") renderDensityTable();
+}
+
+// ═══════════════════════════════════════════
+//  ENTER KEY
+// ═══════════════════════════════════════════
+document.getElementById("valueInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") calculate();
+});
+
+document.getElementById("manualDensity").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("valueInput").focus();
+});
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+buildAll();
+switchTab(state.currentTab);
+</script>
+</body>
+</html>
